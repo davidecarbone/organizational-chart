@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    image: organizational-chart:latest
+    restart: on-failure
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+    hostname: organizational-chart
+    command: bash -c "vendor/bin/phinx migrate -t 20200829094320 && apachectl -D FOREGROUND"
+    volumes:
+      - .:/var/www/html
+      - vendor:/var/www/html/vendor
+    environment:
+      - API_BASE_URL=web:80/
+      - DB_HOST=db
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+volumes:
+  vendor:
