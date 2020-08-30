@@ -6,7 +6,6 @@ COPY composer.json /var/www/html/
 COPY composer.lock /var/www/html/
 
 RUN pecl config-set verbose 0
-#RUN pecl install mongodb && echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongo.ini
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && composer install
 
