@@ -27,10 +27,13 @@ class NodeController
 	 */
 	public function getNodes(Request $request, Response $response)
 	{
-		$nodes = $this->repository->findNodesById(1);
+		$nodeId = (int) $request->getAttribute('nodeId');
+		$language = $request->getQueryParam('language');
+
+		$nodes = $this->repository->findNodeByIdAndLanguage($nodeId, $language);
 
 		return $response->withJson(
-			empty($nodes) ? [] : $nodes->exportToArray(),
+			empty($nodes) ? [] : ['nodes' => $nodes],
 			200
 		);
 	}

@@ -19,7 +19,7 @@ $container['Connection'] = function($container) {
 	$dbName = $configuration->get('DB_NAME');
 
 	if (!$connection = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName)) {
-		throw new \Exception("err");
+		throw new \Exception("Could not connect to the database.");
 	}
 
 	return $connection;
