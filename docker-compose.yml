@@ -12,7 +12,7 @@ services:
     depends_on:
       - db
     hostname: organizational-chart
-    command: bash -c "vendor/bin/phinx migrate && apachectl -D FOREGROUND"
+    command: bash -c "./.docker/wait-for-it.sh -t 0 db:3306 && vendor/bin/phinx migrate && apachectl -D FOREGROUND"
     volumes:
       - .:/var/www/html
       - vendor:/var/www/html/vendor
@@ -28,12 +28,11 @@ services:
       dockerfile: .docker/db/Dockerfile
     image: db:latest
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
+    restart: on-failure
     ports:
       - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: password
-      #MYSQL_SCHEMA_NAME: organizational_chart
   adminer:
     image: adminer
     restart: always

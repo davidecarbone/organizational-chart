@@ -18,5 +18,9 @@ $container['Connection'] = function($container) {
 	$dbPassword = $configuration->get('DB_PASSWORD');
 	$dbName = $configuration->get('DB_NAME');
 
-	return mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName);
+	if (!$connection = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName)) {
+		throw new \Exception("err");
+	}
+
+	return $connection;
 };
