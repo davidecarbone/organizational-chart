@@ -26,7 +26,7 @@ class Repository
 	 *
 	 * @return array|null
 	 */
-	public function findNodeByIdAndLanguage(int $nodeId, string $language, $searchKeyword, $pageNumber, $pageSize): ?array
+	public function findChildNodes(int $nodeId, string $language, $searchKeyword, $pageNumber, $pageSize): ?array
 	{
 		$offset = $pageNumber * $pageSize;
 
