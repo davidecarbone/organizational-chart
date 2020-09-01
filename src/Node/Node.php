@@ -34,6 +34,14 @@ final class Node implements \JsonSerializable
 
 	public function jsonSerialize()
 	{
+		return $this->exportToArray();
+	}
+
+	/**
+	 * @return array
+	 */
+	public function exportToArray(): array
+	{
 		return [
 			'nodeId' => $this->id,
 			'nodeName' => $this->name,
