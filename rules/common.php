@@ -1,5 +1,6 @@
 <?php
 
+use GuzzleHttp\Client;
 use OrganizationalChart\Configuration\Configuration;
 
 $container['Configuration'] = function() {
@@ -23,4 +24,15 @@ $container['Connection'] = function($container) {
 	}
 
 	return $connection;
+};
+
+$container['HttpClient'] = function($container) {
+	/** @var Configuration */
+	$configuration = $container['Configuration'];
+
+	return new Client([
+		'base_uri' => $configuration->get('API_BASE_URL'),
+		'timeout' => 10.0,
+		'allow_redirects' => false,
+	]);
 };
