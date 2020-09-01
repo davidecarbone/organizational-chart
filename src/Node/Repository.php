@@ -20,34 +20,50 @@ class Repository
 	/**
 	 * @param int    $nodeId
 	 * @param string $language
+	 * @param string $searchKeyword
+	 * @param int    $pageNumber
+	 * @param int    $pageSize
 	 *
 	 * @return array|null
 	 */
-	public function findNodeByIdAndLanguage(int $nodeId, string $language): ?array
+	public function findNodeByIdAndLanguage(int $nodeId, string $language, $searchKeyword, $pageNumber, $pageSize): ?array
 	{
-		$result = $this->connection->query(
-			"SELECT
-			   node.idNode,
-			   name.nodeName,
-			   (
-			     SELECT COUNT(child.idNode)
-				 FROM node_tree AS child, node_tree AS parent
-				 WHERE
-				   parent.idNode = '$nodeId'
-				   AND child.level = parent.level+1
-				   AND child.iLeft > parent.iLeft
-				   AND child.iRight < parent.iRight
-			   ) AS childrenCount
-			 FROM node_tree AS node
-			 INNER JOIN node_tree_names AS name ON node.idNode = name.idNode
-			 WHERE node.idNode = '$nodeId'
-			   AND language = '$language'"
-		);
+		$offset = $pageNumber * $pageSize;
 
-		if (!$row = $result->fetch_assoc()) {
-			return null;
+		if ($searchKeyword) {
+			$search = "AND name.nodeName = '$searchKeyword'";
 		}
 
-		return $row;
+		$result = $this->connection->query(
+			"SELECT child.idNode, nodeName AS name,
+			   (
+			     SELECT COUNT(child2.idNode)
+				 FROM node_tree AS child2, node_tree AS parent
+				 WHERE
+				   parent.idNode = child.idNode
+				   AND child2.level = parent.level+1
+				   AND child2.iLeft > parent.iLeft
+				   AND child2.iRight < parent.iRight
+			   ) AS childrenCount
+			FROM node_tree AS child, node_tree AS parent, node_tree_names name 
+			WHERE
+			  parent.idNode = '$nodeId'
+			  AND child.level = parent.level+1
+			  AND child.iLeft > parent.iLeft
+			  AND child.iRight < parent.iRight
+			  AND child.idNode = name.idNode 
+			  AND language = '$language'
+			  $search
+			ORDER BY child.idNode ASC 
+			LIMIT $pageSize
+			OFFSET $offset"
+		);
+
+		$nodes = [];
+		while ($row = $result->fetch_assoc()) {
+			$nodes[] = $row;
+		}
+
+		return $nodes;
 	}
 }

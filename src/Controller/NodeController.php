@@ -29,8 +29,11 @@ class NodeController
 	{
 		$nodeId = (int) $request->getAttribute('nodeId');
 		$language = $request->getQueryParam('language');
+		$searchKeyword = $request->getQueryParam('search_keyword');
+		$pageNumber = $request->getQueryParam('page_num') ?: 0;
+		$pageSize = $request->getQueryParam('page_size') ?: 100;
 
-		$nodes = $this->repository->findNodeByIdAndLanguage($nodeId, $language);
+		$nodes = $this->repository->findNodeByIdAndLanguage($nodeId, $language, $searchKeyword, $pageNumber, $pageSize);
 
 		return $response->withJson(
 			empty($nodes) ? [] : ['nodes' => $nodes],
