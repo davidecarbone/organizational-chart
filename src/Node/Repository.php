@@ -3,6 +3,8 @@
 namespace OrganizationalChart\Node;
 
 use mysqli;
+use OrganizationalChart\Language\Language;
+use OrganizationalChart\Pagination\Pagination;
 
 class Repository
 {
@@ -18,24 +20,23 @@ class Repository
     }
 
 	/**
-	 * @param int    $nodeId
-	 * @param string $language
-	 * @param string $searchKeyword
-	 * @param int    $pageNumber
-	 * @param int    $pageSize
+	 * @param int        $nodeId
+	 * @param Language   $language
+	 * @param string     $searchKeyword
+	 * @param Pagination $pagination
 	 *
-	 * @return array|null
+	 * @return Node[]
 	 */
-	public function findChildNodes(int $nodeId, string $language, $searchKeyword, $pageNumber, $pageSize): ?array
+	public function findChildNodes(int $nodeId, Language $language, $searchKeyword, Pagination $pagination): array
 	{
-		$offset = $pageNumber * $pageSize;
+		$search = '';
 
 		if ($searchKeyword) {
 			$search = "AND name.nodeName = '$searchKeyword'";
 		}
 
 		$result = $this->connection->query(
-			"SELECT child.idNode, nodeName AS name,
+			"SELECT child.idNode AS nodeId, nodeName,
 			   (
 			     SELECT COUNT(child2.idNode)
 				 FROM node_tree AS child2, node_tree AS parent
@@ -55,13 +56,13 @@ class Repository
 			  AND language = '$language'
 			  $search
 			ORDER BY child.idNode ASC 
-			LIMIT $pageSize
-			OFFSET $offset"
+			LIMIT {$pagination->pageSize()}
+			OFFSET {$pagination->offset()}"
 		);
 
 		$nodes = [];
 		while ($row = $result->fetch_assoc()) {
-			$nodes[] = $row;
+			$nodes[] = Node::fromPersistence($row);
 		}
 
 		return $nodes;

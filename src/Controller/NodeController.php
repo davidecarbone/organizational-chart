@@ -2,7 +2,9 @@
 
 namespace OrganizationalChart\Controller;
 
+use OrganizationalChart\Language\Language;
 use OrganizationalChart\Node\Repository;
+use OrganizationalChart\Pagination\Pagination;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -34,50 +36,19 @@ class NodeController
 		$pageSize = $request->getQueryParam('page_size') ?? 100;
 
 		try {
-			$this->assertLanguageIsValid($language);
-			$this->assertPageNumberIsValid($pageNumber);
-			$this->assertPageSizeIsValid($pageSize);
+			$language = new Language($language);
+			$pagination = new Pagination($pageNumber, $pageSize);
+			$nodes = $this->repository->findChildNodes($nodeId, $language, $searchKeyword, $pagination);
+
 		} catch (\InvalidArgumentException $e) {
 			return $response->withJson([
 				'error' => $e->getMessage()
 			], 400);
 		}
 
-		$nodes = $this->repository->findChildNodes($nodeId, $language, $searchKeyword, $pageNumber, $pageSize);
-
 		return $response->withJson(
 			empty($nodes) ? [] : ['nodes' => $nodes],
 			200
 		);
-	}
-
-	/**
-	 * @param string $language
-	 */
-	private function assertLanguageIsValid(string $language)
-	{
-		if (empty($language) || !in_array($language, ['english', 'italian'])) {
-			throw new \InvalidArgumentException("language parameter is required to be either 'english' or 'italian'");
-		}
-	}
-
-	/**
-	 * @param $pageNumber
-	 */
-	private function assertPageNumberIsValid($pageNumber)
-	{
-		if (!preg_match('/^[0-9]+$/', $pageNumber)) {
-			throw new \InvalidArgumentException("page_num must be an integer >= 0");
-		}
-	}
-
-	/**
-	 * @param $pageSize
-	 */
-	private function assertPageSizeIsValid($pageSize)
-	{
-		if (!preg_match('/^(0|[1-9][0-9]{0,2}|1000)$/', $pageSize)) {
-			throw new \InvalidArgumentException("page_size must be an integer between 0 and 1000");
-		}
 	}
 }
