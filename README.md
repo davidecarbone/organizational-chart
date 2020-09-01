@@ -18,6 +18,9 @@ This will run three containers with:
  
 The web container will also execute migrations to provide the chart nodes structure.
 
+Note: a first clean installation may take up to 5 minutes depending on your connection.
+
+
 ### Usage
 This API provides a single endpoint to get all child nodes of a given parent node:
 ```
